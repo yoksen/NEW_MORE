@@ -14,10 +14,15 @@ from datetime import datetime
 import clip
 import timm
 
-if __name__ == '__main__':
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+if __name__ == '__main__':        
 
     args = parse_args()
+    torch.cuda.set_device(args.device)
+    args.gpu = args.device
+
+    args.device = torch.cuda.current_device()
+        
+    device = "cuda" if torch.cuda.is_available() else "cpu"
     args.logger = Logger(args, args.folder)
     args.logger.now()
 

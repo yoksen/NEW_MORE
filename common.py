@@ -6,6 +6,8 @@ def parse_args():
     parser.add_argument('--root', type=str, default='./')
     parser.add_argument('--load_dir', type=str, default=None, help='if provided, load model and test')
     parser.add_argument('--load_task_id', type=int, default=None)
+    parser.add_argument('--device', type=int, default=None)
+    
     parser.add_argument('--print_filename', type=str, default=None, help="if None, prints on 'result.txt' file")
     parser.add_argument('--dataset', type=str, default='cifar100', choices=['mnist', 'cifar100', 'cifar10', 'timgnet', 'imagenet'])
     parser.add_argument('--model', type=str, default='derpp', choices=['derpp', 'derpp_deit', 'joint', 'owm', 'birch', 'ood', 'hier',
