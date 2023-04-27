@@ -251,7 +251,7 @@ class StandardCL:
 
 def get_data(args):
     train_transform, test_transform = augmentations(args)
-    args.root = './'
+    args.root = '/root/autodl-tmp/data'
 
     if args.dataset == 'mnist':
         train = MNIST(root=args.root, train=True, download=True, transform=train_transform)
