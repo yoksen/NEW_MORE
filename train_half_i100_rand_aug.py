@@ -40,21 +40,41 @@ print("Process PID:", pid)
 
 mean = (0.485, 0.456, 0.406)
 std = (0.229, 0.224, 0.225)
-train_trsf = transforms.Compose([ 
-    transforms.Resize((224, 224)),
-    transforms.RandomCrop(224, padding=4),
-    transforms.RandomHorizontalFlip(),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=mean, std=std),
-])
+# train_trsf = transforms.Compose([ 
+#     transforms.Resize((224, 224)),
+#     transforms.RandomCrop(224, padding=4),
+#     transforms.RandomHorizontalFlip(),
+#     transforms.ToTensor(),
+#     transforms.Normalize(mean=mean, std=std),
+# ])
 
-train_trsf.transforms.insert(0, RandAugment(2,15 , args=None))
+# train_trsf.transforms.insert(0, RandAugment(2,15 , args=None))
 
+# test_trsf = transforms.Compose([
+#     transforms.Resize((224, 224)),
+#     transforms.ToTensor(),
+#     transforms.Normalize(mean=mean, std=std),
+# ])
+
+train_trsf = transforms.Compose([
+            transforms.RandomResizedCrop(224, scale=(0.2, 1.)),
+            transforms.RandomApply([
+                transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)  # not strengthened
+            ], p=0.8),
+            transforms.RandomGrayscale(p=0.2),
+            # transforms.RandomApply([myTransforms.GaussianBlur([.1, 2.])], p=0.5),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        ])
 test_trsf = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=mean, std=std),
-])
+            transforms.Resize((256,256)), # 256
+            transforms.CenterCrop(224), # 224
+            transforms.Resize((224,224)),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        ])
+
 device = torch.device('cuda:{}'.format(args.device))
 
 num_epochs = 200

@@ -13,7 +13,10 @@ import os
 import argparse
 parser = argparse.ArgumentParser(description='CIFAR100 training with DeiT-Small')
 parser.add_argument('--lr', default=0.1, type=float, help='learning rate')
+parser.add_argument('--device', default=0, type=int, help='device')
+
 args = parser.parse_args()
+
 train_trsf = transforms.Compose([
         transforms.RandomResizedCrop(224),
         transforms.RandomHorizontalFlip(),#cancel colorjitter so far
