@@ -7,11 +7,11 @@ import torch
 import clip
 import torchvision.transforms as transforms
 from torch.utils.data.dataset import Subset
-from datasets.cifar_mod import CIFAR100, CIFAR10
+from datasets.cifar_mod import CIFAR100, CIFAR10, CIFAR100_Half
 from datasets.mnist3d import MNIST3D as MNIST
 from custom_imagefolder import ImageFolder
 from datasets.class_split import ClassSplit
-
+import pickle
 import timm
 from timm.data import resolve_data_config
 from timm.data.transforms_factory import create_transform
@@ -66,6 +66,18 @@ def augmentations(args):
                 transforms.ToTensor(),
                 transforms.Normalize((0.5071, 0.4866, 0.4409), (0.2009, 0.1984, 0.2023)),
             ])
+        elif args.dataset == "cifar100_cut_half_seed32":
+            train_transform = transforms.Compose([
+                transforms.RandomCrop(32, padding=4),
+                transforms.RandomHorizontalFlip(),
+                #transforms.RandomRotation(10),
+                transforms.ToTensor(),
+                transforms.Normalize((0.5071, 0.4866, 0.4409), (0.2009, 0.1984, 0.2023)),
+            ])
+            test_transform = transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Normalize((0.5071, 0.4866, 0.4409), (0.2009, 0.1984, 0.2023)),
+            ])
         # The tiny imagenet data is resized to 32 as CIFAR. Originally t-imagenet is size 64
         elif args.dataset == 'timgnet':
             train_transform = transforms.Compose([
@@ -102,7 +114,7 @@ def generate_random_cl(args):
     if args.dataset == 'mnist':
         fine_label = ['zero', 'one', 'two', 'three', 'four',
                'five', 'six', 'seven', 'eight', 'nine']
-    elif args.dataset == 'cifar100':
+    elif args.dataset == 'cifar100' or args.dataset == 'cifar100_cut_half_seed32':
         from datasets.label_names import fine_label as fine_label
     elif args.dataset == 'cifar10':
         from datasets.label_names import cifar10_labels as fine_label
@@ -176,7 +188,7 @@ class StandardCL:
             idx_list.append(idx)
             if self.validation is not None: idx_list_valid.append(idx_valid)
 
-            if self.args.dataset in ['cifar100', 'cifar10', 'mnist']:
+            if self.args.dataset in ['cifar100', 'cifar10', 'mnist', 'cifar100_cut_half_seed32']:
                 data_aux.append(self.dataset.data[idx])
                 targets_aux.append(np.zeros(len(idx), dtype=np.int) + self.seen_names.index(name))
                 full_targets_aux.append([[self.seen_names.index(name),
@@ -203,7 +215,7 @@ class StandardCL:
             else:
                 raise NotImplementedError()
 
-        if self.args.dataset in ['cifar100', 'cifar10', 'mnist']:
+        if self.args.dataset in ['cifar100', 'cifar10', 'mnist','cifar100_cut_half_seed32']:
             dataset_.data = np.array(list(chain(*data_aux)))
             dataset_.targets = np.array(list(chain(*targets_aux)))
             dataset_.full_labels = np.array(list(chain(*full_targets_aux)))
@@ -268,6 +280,14 @@ def get_data(args):
     elif args.dataset == 'timgnet':
         train = ImageFolder(root=args.root + '/TinyImagenet/train', transform=train_transform)
         test = ImageFolder(root=args.root + '/TinyImagenet/val_folders', transform=test_transform)
+    elif args.dataset == 'cifar100_cut_half_seed32':
+        with open('/root/autodl-tmp/data/seed50_cl_c100_train.pkl', 'rb') as f:
+            train_data = pickle.load(f)
+        with open('/root/autodl-tmp/data/seed50_cl_c100_test.pkl', 'rb') as f:
+            test_data = pickle.load(f)
+        train = CIFAR100_Half(train_data, transform=train_transform, target_transform=None)
+        test = CIFAR100_Half(test_data, transform=train_transform, target_transform=None)
+        
     if args.validation and ('cifar' in args.dataset or 'mnist' in args.dataset):
         pass
     elif args.validation and args.dataset == 'imagenet':
@@ -275,7 +295,7 @@ def get_data(args):
             test = ImageFolder(root=args.root + '/ImageNet/train', transform=train_transform)
         elif args.dataset == 't-imagenet':
             test = ImageFolder(root=args.root + '/TinyImagenet/train', transform=test_transform)
-
+    
     train = ClassSplit(args).relabel(train)
     test = ClassSplit(args).relabel(test)
     return train, test

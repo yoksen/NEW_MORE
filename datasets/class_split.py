@@ -13,6 +13,8 @@ class ClassSplit:
 				self.split = np.arange(100)
 			elif args.dataset == 'timgnet':
 				self.split = np.arange(200)
+			elif args.dataset == "cifar100_cut_half_seed32":
+				self.split = np.arange(50)
 			else:
 				raise NotImplementedError()
 		elif args.class_order == 1:

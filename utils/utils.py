@@ -739,8 +739,8 @@ def load_deit_pretrain(args, target_model):
     """
         target_model: the model we want to replace the parameters (most likely un-trained)
     """
-    if os.path.isfile('./deit_pretrained/best_checkpoint.pth'):
-        checkpoint = torch.load('./deit_pretrained/best_checkpoint.pth', map_location='cpu')
+    if os.path.isfile('/root/autodl-tmp/MORE/deit_pretrained/best_checkpoint.pth'):
+        checkpoint = torch.load('/root/autodl-tmp/MORE/deit_pretrained/best_checkpoint.pth', map_location='cpu')
     else:
         raise NotImplementedError("Cannot find pre-trained model")
     target = target_model.state_dict()

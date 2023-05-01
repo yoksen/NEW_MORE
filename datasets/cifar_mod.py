@@ -1,7 +1,7 @@
 from PIL import Image
 import numpy as np
 from torchvision.datasets import CIFAR100 as CIFAR100_ORI
-
+from torch.utils.data import Dataset
 class CIFAR100(CIFAR100_ORI):
     base_folder = 'cifar-100-python'
     url = "https://www.cs.toronto.edu/~kriz/cifar-100-python.tar.gz"
@@ -90,3 +90,27 @@ class CIFAR10(CIFAR100):
         self.full_labels = None # None -> np.array for concept shift
 
         self.targets = np.array(self.targets)
+        
+class CIFAR100_Half(Dataset):
+    def __init__(self, data, transform=None, target_transform=None):
+        self.data = np.array([i[0] for i in data])
+        self.transform = transform
+        self.target_transform = target_transform
+        self.targets = np.array([i[1] for i in data])
+        
+    def __getitem__(self, index):
+        input = self.data[index]
+        target = self.targets[index]
+        full_labels = self.full_labels[index]
+        names = self.names[index]
+        
+        if self.transform is not None:
+            input = self.transform(input)
+        
+        if self.target_transform is not None:
+            target = self.target_transform(target)
+        
+        return input, target, full_labels, names, self.data[index]
+    
+    def __len__(self):
+        return len(self.data)
