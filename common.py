@@ -9,7 +9,7 @@ def parse_args():
     parser.add_argument('--device', type=int, default=None)
     
     parser.add_argument('--print_filename', type=str, default=None, help="if None, prints on 'result.txt' file")
-    parser.add_argument('--dataset', type=str, default='cifar100', choices=['mnist', 'cifar100', 'cifar10', 'timgnet', 'imagenet'])
+    parser.add_argument('--dataset', type=str, default='cifar100', choices=['mnist', 'cifar100', 'cifar10', 'timgnet', 'imagenet','cifar100_cut_half_seed32'])
     parser.add_argument('--model', type=str, default='derpp', choices=['derpp', 'derpp_deit', 'joint', 'owm', 'birch', 'ood', 'hier',
                                                                         'hcluster', 'oe', 'oe_fixed_minibatch', 'maha', 'maha_oe',
                                                                         'batch_pca', 'batch_pca_task', 'batch_pca_single',
@@ -182,6 +182,8 @@ def parse_args():
         args.total_cls = 200
     elif args.dataset == 'imagenet':
         args.total_cls = 1000
+    elif args.dataset == 'cifar100_cut_half_seed32':
+        args.total_cls = 50
 
     if args.load_best_args:
         best = best_args[args.dataset][args.model]
